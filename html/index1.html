@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NippleJS Example</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.2/nipplejs.js"></script>
+        <style>
+            #joystick1-container {
+            width: 200px;
+            height: 200px;
+            background-color: #732a2a;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            }
+            #joystick2-container {
+            width: 200px;
+            height: 200px;
+            background-color: #732a2a;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            }
+            body {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: black;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="joystick1-container">
+        </div>
+
+        <div id="joystick2-container">
+
+        </div>
+
+            var ws = new WebSocket("ws://127.0.0.1:8000/ws");
+    <script>
+
+            var options1 = {
+                zone: document.getElementById('joystick1-container'),
+                mode: 'static',
+                position: {left: '50%', top: '50%'},
+                lockY: true
+            };
+            var options2 = {
+                zone: document.getElementById('joystick2-container'),
+                mode: 'static',
+                position: {left: '50%', top: '50%'},
+                lockX: true
+            };
+
+            var manager1 = nipplejs.create(options1);
+            var manager2 = nipplejs.create(options2);
+
+            manager1.on('start', function (evt, nipple) {
+                console.log("Joystick1 touched!");
+            }).on('end', function (evt, nipple) {
+                console.log("Joystick1 released!");
+                ws.send("speed_-1_0")
+            }).on('move', function (evt, nipple) {
+                var angle = nipple.angle.degree;
+                var distance = nipple.distance;
+                console.log("Joystick1 moved. Angle: " + angle + ", Distance: " + distance);
+                ws.send("speed_" + angle + "_" + distance);
+            });
+
+            manager2.on('start', function (evt, nipple) {
+                console.log("Joystick2 touched!");
+            }).on('end', function (evt, nipple) {
+                console.log("Joystick2 released!");
+                ws.send("direction_-1_0")
+            }).on('move', function (evt, nipple) {
+                var angle = nipple.angle.degree;
+                var distance = nipple.distance;
+                console.log("Joystick2 moved. Angle: " + angle + ", Distance: " + distance);
+                ws.send("direction_" + angle + "_" + distance);
+            });
+        </script>
+
+    </body>
+</html>
