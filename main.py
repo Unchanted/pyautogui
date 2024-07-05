@@ -64,4 +64,4 @@ async def websocket_endpoint(websocket: WebSocket):
         
 
 
-app.mount("/", StaticFiles(directory="html",html = True), name="static")
+app.mount("/", StaticFiles(directory="dist",html = True), name="static")

@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+}
+
+.App {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+}
+
+.container {
+  width: 200px;
+  height: 200px;
+  background-color: #732a2a;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
