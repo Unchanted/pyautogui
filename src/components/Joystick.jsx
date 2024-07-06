@@ -1,41 +1,24 @@
 import React, { useEffect } from 'react';
-import nipplejs from 'nipplejs';
+import { Nipple } from 'react-nipple';
+import 'react-nipple/lib/styles.css';
 
 const Joystick = () => {
   useEffect(() => {
     const ws = new WebSocket("/ws");
 
-    const createJoystick = (id, lock) => nipplejs.create({
-      zone: document.getElementById(id),
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      ...lock,
-    });
-
-    const handleMove = (prefix) => (evt, nipple) => {
-      const { degree: angle, distance } = nipple.angle;
-      console.log(`${prefix} moved. Angle: ${angle}, Distance: ${distance}`);
-      ws.send(`${prefix}_${angle}_${distance}`);
+    const handleMove = (prefix) => (evt, data) => {
+      const angle = data.angle?.degree ?? -1; // Use -1 if angle is undefined
+      console.log(`${prefix} moved. Angle: ${angle}`);
+      ws.send(`${prefix}_${angle}`);
     };
 
     const handleEnd = (prefix) => () => {
       console.log(`${prefix} released!`);
-      ws.send(`${prefix}_-1_0`);
+      ws.send(`${prefix}_-1`);
     };
 
-    const manager1 = createJoystick('joystick1-container', { lockY: true });
-    manager1.on('start', () => console.log("Joystick1 touched!"))
-            .on('end', handleEnd("speed"))
-            .on('move', handleMove("speed"));
-
-    const manager2 = createJoystick('joystick2-container', { lockX: true });
-    manager2.on('start', () => console.log("Joystick2 touched!"))
-            .on('end', handleEnd("direction"))
-            .on('move', handleMove("direction"));
-
     return () => {
-      manager1.destroy();
-      manager2.destroy();
+      ws.close();
     };
   }, []);
 
@@ -52,8 +35,30 @@ const Joystick = () => {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: '100vh', margin: 0, backgroundColor: 'black' }}>
-      <div id="joystick1-container" style={containerStyle}></div>
-      <div id="joystick2-container" style={containerStyle}></div>
+      <div style={containerStyle}>
+        <Nipple
+          options={{
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            lockY: true,
+            color: 'white'
+          }}
+          onMove={handleMove('speed')}
+          onEnd={handleEnd('speed')}
+        />
+      </div>
+      <div style={containerStyle}>
+        <Nipple
+          options={{
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            lockX: true,
+            color: 'white'
+          }}
+          onMove={handleMove('direction')}
+          onEnd={handleEnd('direction')}
+        />
+      </div>
     </div>
   );
 };

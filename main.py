@@ -45,23 +45,31 @@ def press_direction(angle, amount):
         direction = angle
 
 
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
-        data = await websocket.receive_text()
-        control, angle, amount = data.split('_')
-        angle = angles[int(angle)]
-        amount = float(amount)
-
-        print(control, angle, amount)
-        
-        if control == 'speed':
-            press_speed(angle, amount)
-        elif control == 'direction':
-            press_direction(angle, amount)
-        
+        try:
+            data = await websocket.receive_text()
+            control, angle_str, amount_str = data.split('_')
+            
+            if angle_str.lower() == 'undefined':
+                angle = None
+            else:
+                angle = angles.get(int(float(angle_str)), None)
+            
+            amount = 0 if amount_str.lower() == 'undefined' else float(amount_str)
+            
+            print(control, angle, amount)
+            
+            if control == 'speed':
+                press_speed(angle, amount)
+            elif control == 'direction':
+                press_direction(angle, amount)
+        except ValueError as e:
+            print(f"Error processing data: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
 
 app.mount("/", StaticFiles(directory="dist",html = True), name="static")
